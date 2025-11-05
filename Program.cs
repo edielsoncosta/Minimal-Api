@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // ✅ Configurar o DbContext antes de Build()
 builder.Services.AddDbContext<DbContexto>(options =>
 {
@@ -19,6 +22,7 @@ builder.Services.AddDbContext<DbContexto>(options =>
 });
 
 var app = builder.Build();
+
 
 app.MapGet("/", () => "Hello World!");
 
@@ -33,5 +37,8 @@ app.MapPost("/login", ([FromBody] LoginDTOs loginDTO, IAdministradorServico admi
         return Results.Unauthorized();
     }
 });
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();
