@@ -37,7 +37,7 @@ namespace MinimalApi.Dominio.Servicos
             return _contexto.Veiculos.FirstOrDefault(v => v.Id == id);
         }
 
-        public List<Veiculo> Todos(int pagina = 1, string? nome = null, string? marca = null)
+        public List<Veiculo> Todos(int? pagina, string? nome = null, string? marca = null)
         {
             var query = _contexto.Veiculos.AsQueryable();
 
@@ -45,7 +45,11 @@ namespace MinimalApi.Dominio.Servicos
                 query = query.Where(v => EF.Functions.Like(v.Nome.ToLower(), $"%{nome.ToLower()}%"));
 
             int itensPorPagina = 10;
-            query = query.Skip((pagina - 1) * itensPorPagina).Take(itensPorPagina);
+            
+            if(pagina != null)
+            {
+                query = query.Skip(((int)pagina - 1) * itensPorPagina).Take(itensPorPagina);
+            }
 
             return query.ToList();
         }
