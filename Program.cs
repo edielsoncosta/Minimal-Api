@@ -48,8 +48,37 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTOs loginDTO, IAdministr
 #endregion
 
 #region Veiculos
+ErrosDeValidacao validaDTO(VeiculoDTO veiculoDTO)
+{
+    var validacao = new ErrosDeValidacao
+    {
+        Message = new List<string>()
+    };
+
+    if (string.IsNullOrEmpty(veiculoDTO.Nome))
+    {
+        validacao.Message.Add("O nome não pode ser vazio");
+    }
+    else if (string.IsNullOrEmpty(veiculoDTO.Marca))
+    {
+        validacao.Message.Add("A marca não pode ter valor nulo");
+    }
+    else if (veiculoDTO.Ano < 1939 || veiculoDTO.Ano > 2026)
+    {
+        validacao.Message.Add("Veículo não está dentro de uma data válida");
+    }
+
+    return validacao;
+}
 app.MapPost("/Veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) =>
 {
+
+    var validacao = validaDTO(veiculoDTO);
+    if(validacao.Message.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
     var veiculo = new Veiculo
     {
         Nome = veiculoDTO.Nome,
@@ -76,10 +105,16 @@ app.MapGet("/veiculos/{id}", ([FromRoute] int id, IVeiculoServico veiculoServico
     return Results.Ok(veiculos);
 }).WithTags("Veiculos");
 
-app.MapPut("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) =>
+app.MapPut("/veiculos/{id}", ([FromRoute] int id,[FromBody] VeiculoDTO veiculoDTO,[FromServices] IVeiculoServico veiculoServico) =>
 {
     var veiculo = veiculoServico.BuscaPorId(id);
     if (veiculo == null) return Results.NotFound();
+
+    var validacao = validaDTO(veiculoDTO);
+    if (validacao.Message.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
 
     veiculo.Nome = veiculoDTO.Nome;
     veiculo.Marca = veiculoDTO.Marca;
@@ -91,7 +126,7 @@ app.MapPut("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO, IVeicul
 }).WithTags("Veiculos");
 
 
-app.MapDelete("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO,IVeiculoServico veiculoServico) =>
+app.MapDelete("/veiculos/{id}", ([FromRoute] int id,[FromBody] VeiculoDTO veiculoDTO,[FromServices] IVeiculoServico veiculoServico) =>
 {
     var veiculo = veiculoServico.BuscaPorId(id);
     if (veiculo == null) return Results.NotFound();

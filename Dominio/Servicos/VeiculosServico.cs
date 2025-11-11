@@ -37,7 +37,7 @@ namespace MinimalApi.Dominio.Servicos
             return _contexto.Veiculos.FirstOrDefault(v => v.Id == id);
         }
 
-        public List<Veiculo> Todos(int? pagina, string? nome = null, string? marca = null)
+        public List<Veiculo> Todos(int? pagina = 1, string? nome = null, string? marca = null)
         {
             var query = _contexto.Veiculos.AsQueryable();
 
