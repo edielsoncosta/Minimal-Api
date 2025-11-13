@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using minimal_api.Dominio.DTOs;
+using minimal_api.Dominio.Enums;
 using minimal_api.Dominio.ModelViews;
 using minimal_api.Infraestrutura.Db;
 using Minimalapi.Dominio.Entidades;
@@ -44,6 +45,59 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTOs loginDTO, IAdministr
     {
         return Results.Unauthorized();
     }
+}).WithTags("Administrador");
+
+
+app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) =>
+{
+    return Results.Ok(administradorServico.Todos(pagina));
+}).WithTags("Administrador");
+
+app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
+{
+    var administrador = administradorServico.BuscaPorId(id);
+
+    if (administrador == null) return Results.NotFound();
+    return Results.Ok(administrador);
+}).WithTags("Administrador");
+
+app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, IAdministradorServico administradorServico) =>
+{
+    var validacao = new ErrosDeValidacao
+    {
+        Message = new List<string>()
+    };
+
+    if (string.IsNullOrEmpty(administradorDTO.Email))
+    {
+        validacao.Message.Add("Email não pode ser vazio");
+    }
+
+    if (string.IsNullOrEmpty(administradorDTO.Senha))
+    {
+        validacao.Message.Add("Senha não pode ser vazia");
+    }
+    else if (string.IsNullOrEmpty(administradorDTO.perfil.ToString()))
+    {
+        validacao.Message.Add("Perfil não pode ser vazio");
+    }
+
+    if (validacao.Message.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
+    var veiculo = new Administrador
+    {
+        Email = administradorDTO.Email,
+        Senha = administradorDTO.Senha,
+        Perfil = administradorDTO.perfil.ToString() ?? Perfil.editor.ToString()
+    };
+
+    administradorServico.Incluir(veiculo);
+
+    return Results.Created($"/administrador/{veiculo.Id}", veiculo);
+
 }).WithTags("Administrador");
 #endregion
 
