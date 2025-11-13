@@ -50,7 +50,19 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTOs loginDTO, IAdministr
 
 app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) =>
 {
-    return Results.Ok(administradorServico.Todos(pagina));
+    var adms = new List<AdministradorModelView>();
+    var administradores = administradorServico.Todos(pagina);
+    foreach (var adm in administradores)
+    {
+        adms.Add(new AdministradorModelView
+        {
+            Email = adm.Email,
+            Id = adm.Id,
+            Perfil = adm.Perfil
+        });
+    }
+
+    return Results.Ok(adms);
 }).WithTags("Administrador");
 
 app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
