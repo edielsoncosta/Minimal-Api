@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,20 @@ app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
 #endregion
 
 #region Administradores
+
+string GerarTokenJwt(Administrador administrador)
+{
+    if (string.IsNullOrEmpty(Key)) return string.Empty;
+
+    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key));
+    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+    var token = new JwtSecurityToken(
+        expires: DateTime.Now.AddDays(1),
+        signingCredentials: credentials
+    );
+}
+
 app.MapPost("/administradores/login", ([FromBody] LoginDTOs loginDTO, IAdministradorServico administradorServico) =>
 {
     if (administradorServico.Login(loginDTO) != null)
@@ -133,7 +148,7 @@ app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, I
 
     return Results.Created($"/administrador/{veiculo.Id}", veiculo);
 
-}).WithTags("Administrador");
+}).RequireAuthorization().WithTags("Administrador");
 #endregion
 
 #region Veiculos
@@ -212,7 +227,7 @@ app.MapPut("/veiculos/{id}", ([FromRoute] int id,[FromBody] VeiculoDTO veiculoDT
     veiculoServico.Atualizar(veiculo);
 
     return Results.Ok(veiculo);
-}).WithTags("Veiculos");
+}).RequireAuthorization().WithTags("Veiculos");
 
 
 app.MapDelete("/veiculos/{id}", ([FromRoute] int id,[FromBody] VeiculoDTO veiculoDTO,[FromServices] IVeiculoServico veiculoServico) =>
