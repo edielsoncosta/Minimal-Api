@@ -86,7 +86,7 @@ app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico a
     }
 
     return Results.Ok(adms);
-}).WithTags("Administrador");
+}).RequireAuthorization().WithTags("Administrador");
 
 app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
 {
