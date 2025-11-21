@@ -56,7 +56,7 @@ ConcessionariaAPI/
 │   │
 │   ├── Entidade/
 │   │   ├── Administrador.cs
-│   │   └── Veiculo.cs
+│   │   └── Veiculo.cs 
 │   │
 │   ├── Enums/
 │   │   └── Perfis.cs
@@ -133,4 +133,4 @@ Retorno:
 
 📜 Licença
 
-Este projeto é totalmente livre para estudo e aprimoramento.
+Este projeto é totalmente livre para estudo e aprimoramento!
